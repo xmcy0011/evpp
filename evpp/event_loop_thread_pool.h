@@ -6,45 +6,51 @@
 #include "evpp/event_loop_thread.h"
 
 namespace evpp {
-class EVPP_EXPORT EventLoopThreadPool : public ServerStatus {
-public:
-    typedef std::function<void()> DoneCallback;
+    class EVPP_EXPORT EventLoopThreadPool : public ServerStatus {
+    public:
+        typedef std::function<void()> DoneCallback;
 
-    EventLoopThreadPool(EventLoop* base_loop, uint32_t thread_num);
-    ~EventLoopThreadPool();
+        EventLoopThreadPool(EventLoop *base_loop, uint32_t thread_num);
 
-    bool Start(bool wait_thread_started = false);
+        ~EventLoopThreadPool();
 
-    void Stop(bool wait_thread_exited = false);
-    void Stop(DoneCallback fn);
+        bool Start(bool wait_thread_started = false);
 
-    // @brief Join all the working thread. If you forget to call this method,
-    // it will be invoked automatically in the destruct method ~EventLoopThreadPool().
-    // @note DO NOT call this method from any of the working thread.
-    void Join();
+        void Stop(bool wait_thread_exited = false);
 
-    // @brief Reinitialize some data fields after a fork
-    void AfterFork();
-public:
-    EventLoop* GetNextLoop();
-    EventLoop* GetNextLoopWithHash(uint64_t hash);
+        void Stop(DoneCallback fn);
 
-    uint32_t thread_num() const;
+        // @brief Join all the working thread. If you forget to call this method,
+        // it will be invoked automatically in the destruct method ~EventLoopThreadPool().
+        // @note DO NOT call this method from any of the working thread.
+        void Join();
 
-private:
-    void Stop(bool wait_thread_exit, DoneCallback fn);
-    void OnThreadStarted(uint32_t count);
-    void OnThreadExited(uint32_t count);
+        // @brief Reinitialize some data fields after a fork
+        void AfterFork();
 
-private:
-    EventLoop* base_loop_;
+    public:
+        EventLoop *GetNextLoop();
 
-    uint32_t thread_num_ = 0;
-    std::atomic<int64_t> next_ = { 0 };
+        EventLoop *GetNextLoopWithHash(uint64_t hash);
 
-    DoneCallback stopped_cb_;
+        uint32_t thread_num() const;
 
-    typedef std::shared_ptr<EventLoopThread> EventLoopThreadPtr;
-    std::vector<EventLoopThreadPtr> threads_;
-};
+    private:
+        void Stop(bool wait_thread_exit, DoneCallback fn);
+
+        void OnThreadStarted(uint32_t count);
+
+        void OnThreadExited(uint32_t count);
+
+    private:
+        EventLoop *base_loop_;
+
+        uint32_t thread_num_ = 0;
+        std::atomic<int64_t> next_ = {0};
+
+        DoneCallback stopped_cb_;
+
+        typedef std::shared_ptr<EventLoopThread> EventLoopThreadPtr;
+        std::vector<EventLoopThreadPtr> threads_;
+    };
 }

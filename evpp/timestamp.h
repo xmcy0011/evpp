@@ -5,48 +5,57 @@
 
 
 namespace evpp {
-class Timestamp {
-public:
-    Timestamp();
-    explicit Timestamp(int64_t nanoseconds);
-    explicit Timestamp(const struct timeval& t);
+    class Timestamp {
+    public:
+        Timestamp();
 
-    static Timestamp Now(); // returns the current local time.
+        explicit Timestamp(int64_t nanoseconds);
 
-    struct timeval TimeVal() const;
-    void To(struct timeval* t) const;
+        explicit Timestamp(const struct timeval &t);
 
-    // Unix returns t as a Unix time, the number of seconds elapsed
-    // since January 1, 1970 UTC.
-    int64_t Unix() const;
+        static Timestamp Now(); // returns the current local time.
 
-    // UnixNano returns t as a Unix time, the number of nanoseconds elapsed
-    // since January 1, 1970 UTC. The result is undefined if the Unix time
-    // in nanoseconds cannot be represented by an int64.
-    int64_t UnixNano() const;
+        struct timeval TimeVal() const;
 
-    // UnixNano returns t as a Unix time, the number of microseconds elapsed
-    // since January 1, 1970 UTC. The result is undefined if the Unix time
-    // in microseconds cannot be represented by an int64.
-    int64_t UnixMicro() const;
+        void To(struct timeval *t) const;
 
-    void Add(Duration d);
+        // Unix returns t as a Unix time, the number of seconds elapsed
+        // since January 1, 1970 UTC.
+        int64_t Unix() const;
 
-    bool IsEpoch() const;
-    bool operator< (const Timestamp& rhs) const;
-    bool operator==(const Timestamp& rhs) const;
+        // UnixNano returns t as a Unix time, the number of nanoseconds elapsed
+        // since January 1, 1970 UTC. The result is undefined if the Unix time
+        // in nanoseconds cannot be represented by an int64.
+        int64_t UnixNano() const;
 
-    Timestamp operator+=(const Duration& rhs);
-    Timestamp operator+ (const Duration& rhs) const;
-    Timestamp operator-=(const Duration& rhs);
-    Timestamp operator- (const Duration& rhs) const;
-    Duration  operator- (const Timestamp& rhs) const;
+        // UnixNano returns t as a Unix time, the number of microseconds elapsed
+        // since January 1, 1970 UTC. The result is undefined if the Unix time
+        // in microseconds cannot be represented by an int64.
+        int64_t UnixMicro() const;
 
-private:
-    // ns_ gives the number of nanoseconds elapsed since the Epoch
-    // 1970-01-01 00:00:00 +0000 (UTC).
-    int64_t ns_;
-};
+        void Add(Duration d);
+
+        bool IsEpoch() const;
+
+        bool operator<(const Timestamp &rhs) const;
+
+        bool operator==(const Timestamp &rhs) const;
+
+        Timestamp operator+=(const Duration &rhs);
+
+        Timestamp operator+(const Duration &rhs) const;
+
+        Timestamp operator-=(const Duration &rhs);
+
+        Timestamp operator-(const Duration &rhs) const;
+
+        Duration operator-(const Timestamp &rhs) const;
+
+    private:
+        // ns_ gives the number of nanoseconds elapsed since the Epoch
+        // 1970-01-01 00:00:00 +0000 (UTC).
+        int64_t ns_;
+    };
 } // namespace evpp
 
 #include "timestamp.inl.h"

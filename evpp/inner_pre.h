@@ -4,9 +4,11 @@
 #include <stdint.h>
 
 #ifdef __cplusplus
+
 #include <iostream>
 #include <memory>
 #include <functional>
+
 #endif // end of define __cplusplus
 
 #include "platform_config.h"
@@ -17,7 +19,9 @@
 
 struct event;
 namespace evpp {
-    int EventAdd(struct event* ev, const struct timeval* timeout);
-    int EventDel(struct event*);
+    int EventAdd(struct event *ev, const struct timeval *timeout);
+
+    int EventDel(struct event *);
+
     EVPP_EXPORT int GetActiveEventCount();
 }

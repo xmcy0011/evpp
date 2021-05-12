@@ -21,6 +21,7 @@
 #include <evutil.h>
 #include <evdns.h>
 #else
+
 #include <event2/event.h>
 #include <event2/event_struct.h>
 #include <event2/buffer.h>
@@ -33,6 +34,7 @@
 #include <event2/dns_compat.h>
 #include <event2/dns_struct.h>
 #include <event2/listener.h>
+
 #ifdef _DEBUG
 #if LIBEVENT_VERSION_NUMBER >= 0x02010500
 #define  ev_arg ev_evcallback.evcb_arg

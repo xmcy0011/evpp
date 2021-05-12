@@ -21,10 +21,12 @@ typedef int ssize_t;
 #define iov_len  len
 
 #else
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include <sys/uio.h>
+
 #ifndef SOCKET
 #   define SOCKET int           /**< SOCKET definition */
 #endif

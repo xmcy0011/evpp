@@ -3,12 +3,14 @@
 // Fix VS compile warning
 // 1>c:\program files (x86)\microsoft visual studio 14.0\vc\include\xkeycheck.h(250): fatal error C1189: #error:  The C++ Standard Library forbids macroizing keywords. Enable warning C4005 to find the forbidden macro.
 #ifdef __cplusplus
+
 #include <iostream>
+
 #endif
 
 
 //! Define Operation System.
-#if ( defined(WIN32) || defined(WIN64) )
+#if (defined(WIN32) || defined(WIN64))
 #   ifndef H_OS_WINDOWS
 #       define H_OS_WINDOWS
 #   endif
@@ -76,7 +78,6 @@
 #pragma comment(lib, "event_extra.lib") // libevent2.0
 #endif
 #endif
-
 
 
 #ifdef H_OS_WINDOWS
