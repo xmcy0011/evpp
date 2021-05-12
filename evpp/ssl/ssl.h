@@ -25,39 +25,38 @@ extern "C" {
 #include <iomanip>
 #include <sstream>
 
-#include <libwebsocket/IBytesBuffer.h>
+#include "evpp/buffer.h"
+#include "evpp/windows_port.h"
 
-namespace muduo {
-	namespace net {
-		namespace ssl {
-		
-			//SSL_CTX_Init
-			void SSL_CTX_Init(
-				std::string const& cert_path,
-				std::string const& private_key_path,
-				std::string const& client_ca_cert_file_path = "",
-				std::string const& client_ca_cert_dir_path = "");
+namespace evpp {
+    namespace ssl {
 
-			//SSL_CTX_Get
-			SSL_CTX* SSL_CTX_Get();
+        //SSL_CTX_Init
+        void EVPP_EXPORT SSL_CTX_Init(
+                std::string const &cert_path,
+                std::string const &private_key_path,
+                std::string const &client_ca_cert_file_path = "",
+                std::string const &client_ca_cert_dir_path = "");
 
-			//SSL_CTX_free
-			void SSL_CTX_free();
+        //SSL_CTX_Get
+        SSL_CTX *EVPP_EXPORT SSL_CTX_Get();
 
-			//SSL_read
-			ssize_t SSL_read(SSL* ssl, IBytesBuffer* buf, int* savedErrno);
+        //SSL_CTX_free
+        void EVPP_EXPORT SSL_CTX_free();
 
-			//SSL_write
-			ssize_t SSL_write(SSL* ssl, void const* data, size_t len, int* savedErrno);
+        //SSL_read
+        ssize_t EVPP_EXPORT SSL_read(SSL *ssl, Buffer *buf, int *savedErrno);
 
-			//SSL_handshake
-			bool SSL_handshake(SSL_CTX* ctx, SSL*& ssl, int sockfd, int& saveErrno);
+        //SSL_write
+        ssize_t EVPP_EXPORT SSL_write(SSL *ssl, void const *data, size_t len, int *savedErrno);
 
-			//SSL_free
-			void SSL_free(SSL*& ssl);
+        //SSL_handshake
+        bool EVPP_EXPORT SSL_handshake(SSL_CTX *ctx, SSL *&ssl, int sockFd, int &saveErrno);
 
-		};//namespace ssl
-	};//namespace net
-}; //namespace muduo
+        //SSL_free
+        void EVPP_EXPORT SSL_free(SSL *&ssl);
+
+    };//namespace ssl
+}; //namespace evpp
 
 #endif

@@ -87,18 +87,21 @@ message (STATUS "THRIFT_INCLUDE_DIR " ${THRIFT_INCLUDE_DIR})
 message (STATUS "THRIFT_LIBRARY " ${THRIFT_LIBRARY})
 
 add_subdirectory (evpp)
-add_subdirectory (apps)
-add_subdirectory (labs)
 
-if (NOT EVPP_VCPKG_BUILD)
-    add_subdirectory (test)
-    add_subdirectory (examples)
-    add_subdirectory (benchmark)
-endif ()
+# 不生成 其他项目
 
-set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-include (utils)
-include (packages)
-
-include (CPack)
-include (CTest)
+#add_subdirectory (apps)
+#add_subdirectory (labs)
+#
+#if (NOT EVPP_VCPKG_BUILD)
+#    add_subdirectory (test)
+#    add_subdirectory (examples)
+#    add_subdirectory (benchmark)
+#endif ()
+#
+#set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+#include (utils)
+#include (packages)
+#
+#include (CPack)
+#include (CTest)

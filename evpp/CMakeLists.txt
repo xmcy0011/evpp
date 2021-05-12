@@ -7,6 +7,7 @@ file(GLOB evpp_HTTP_PUBLIC_HEADERS http/*.h)
 file(GLOB evpp_EVPPHTTP_PUBLIC_HEADERS evpphttp/*.h)
 file(GLOB evpp_HTTPC_PUBLIC_HEADERS httpc/*.h)
 file(GLOB evpp_UDP_PUBLIC_HEADERS udp/*.h)
+file(GLOB evpp_SSL_PUBLIC_HEADERS ssl/*.h)
 
 message(STATUS "evpp_SRCS : " ${evpp_SRCS})
 
@@ -27,7 +28,7 @@ add_library(evpp_lite_static STATIC ${evpp_lite_SRCS})
 target_link_libraries(evpp_lite_static ${DEPENDENT_LIBRARIES})
 
 if (UNIX)
-    add_library(evpp SHARED ${evpp_SRCS})
+    add_library(evpp SHARED ${evpp_SRCS} ssl_server.h ssl_server.cpp)
     target_link_libraries(evpp ${DEPENDENT_LIBRARIES})
 
     # boost lockfree queue
@@ -77,3 +78,4 @@ install (FILES ${evpp_HTTP_PUBLIC_HEADERS} DESTINATION "include/evpp/http")
 install (FILES ${evpp_EVPPHTTP_PUBLIC_HEADERS} DESTINATION "include/evpp/evpphttp")
 install (FILES ${evpp_HTTPC_PUBLIC_HEADERS} DESTINATION "include/evpp/httpc")
 install (FILES ${evpp_UDP_PUBLIC_HEADERS} DESTINATION "include/evpp/udp")
+install (FILES ${evpp_SSL_PUBLIC_HEADERS} DESTINATION "include/evpp/ssl")

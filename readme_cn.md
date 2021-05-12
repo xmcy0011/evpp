@@ -11,6 +11,12 @@ evpp
 
 [evpp]是一个基于[libevent]开发的现代化C++11高性能网络服务器，自带TCP/UDP/HTTP等协议的异步非阻塞式的服务器和客户端库。
 
+# ChangeLog
+
+本分支基于 [evpp](https://github.com/Qihoo360/evpp) 8984ca6b
+
+- 增加build.md文档
+- 增加evpp/ssl目录，支持SSL over TCP
 
 # 特性
 
