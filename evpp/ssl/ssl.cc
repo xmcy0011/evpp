@@ -24,6 +24,7 @@ extern "C" {
 #include <sstream>
 
 #include "ssl.h"
+#include "evpp/utility.h"
 
 #define atom_incr(i) __sync_add_and_fetch(&i, 1)
 #define atom_decr(i) __sync_add_and_fetch(&i, -1)
@@ -279,11 +280,11 @@ namespace evpp {
                     /*OPENSSL_INIT_LOAD_CONFIG |*/
                     OPENSSL_INIT_LOAD_SSL_STRINGS |
                     OPENSSL_INIT_LOAD_CRYPTO_STRINGS, NULL) == 0) {
-                printf("OPENSSL_init_ssl error\n");
+                LOG_ERROR << "OPENSSL_init_ssl error";
                 return;
             }
             ::ERR_clear_error();
-            printf("OPENSSL_init_ssl\n");
+            LOG_TRACE << "OPENSSL_init_ssl success";
 #endif
         }
 
@@ -393,6 +394,10 @@ namespace evpp {
                 std::string const &client_ca_cert_dir_path) {
             if (cert_path.empty() || private_key_path.empty()) {
                 LOG_ERROR << "SSL_CTX_setup_certs failed: empty cert or private key path";
+                return false;
+            }
+            if (!evpp::FilePathIsExist(cert_path.c_str()) || !evpp::FilePathIsExist(private_key_path.c_str())) {
+                LOG_ERROR << "cert_path or private_key_path not exist";
                 return false;
             }
             //SSL_CTX_create

@@ -9,6 +9,8 @@
 #define H_CASE_STRING_END()  default:return "Unknown";break;}
 #endif
 
+#include <unistd.h>
+
 namespace evpp {
 
     template<class StringVector,
@@ -52,5 +54,14 @@ namespace evpp {
             ++numSplits;
 
         } while (pos != StringType::npos);
+    }
+
+    /**@fn FilePathIsExist
+      *@brief 检测文件路径是否存在
+      *@param file_name：文件路径
+      *@return
+      */
+    inline bool FilePathIsExist(const std::string &file_name) {
+        return ::access(file_name.c_str(), 0) == F_OK;
     }
 }

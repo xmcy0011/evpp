@@ -105,6 +105,7 @@ namespace evpp {
 
     void TCPConn::Send(Buffer *buf) {
         if (status_ != kConnected) {
+            DLOG_TRACE << "not connected";
             return;
         }
 
@@ -139,7 +140,7 @@ namespace evpp {
         // if no data in output queue, writing directly
         if (!chan_->IsWritable() && output_buffer_.length() == 0) {
             int serrno = errno;
-            if (ssl_) {
+            if (enable_ssl_) {
                 nwritten = evpp::ssl::SSL_write(ssl_, data, len, &serrno);
                 switch (serrno) {
                     case SSL_ERROR_WANT_WRITE:

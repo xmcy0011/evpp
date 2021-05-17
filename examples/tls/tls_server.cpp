@@ -8,16 +8,19 @@
 #include <evpp/tcp_conn.h>
 
 int main() {
-
-    std::string addr = "0.0.0.0:9099";
+    std::string addr = "0.0.0.0:8433";
     int thread_num = 4;
     evpp::EventLoop loop;
 
-    evpp::ssl::SSL_CTX_Init("cert.pem", "private.key");
+    if (!evpp::ssl::SSL_CTX_Init("google.com.pem", "google.com.key")) {
+        LOG_ERROR << "SSL_CTX_Init error";
+        return 0;
+    }
 
-    evpp::ssl::SSLServer server(&loop, addr, "TCPEchoServer", thread_num, evpp::ssl::SSL_CTX_Get());
+    evpp::ssl::SSLServer server(&loop, addr, "TlsServer", thread_num, evpp::ssl::SSL_CTX_Get());
     server.SetMessageCallback([](const evpp::TCPConnPtr &conn,
                                  evpp::Buffer *msg) {
+        LOG_INFO << "recv client msg:len=" << msg->length() << ",content=" << msg->ToString();
         // Do something with the received message
         conn->Send(msg); // At here, we just send the received message back.
     });

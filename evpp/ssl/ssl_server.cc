@@ -31,7 +31,7 @@ namespace evpp {
             DLOG_TRACE << "name=" << name << " listening addr " << laddr << " thread_num=" << thread_num;
             tpool_.reset(new EventLoopThreadPool(loop_, thread_num));
 
-            assert(ctx);
+            assert(ctx != nullptr);
             ssl_ctx_ = ctx;
         }
 

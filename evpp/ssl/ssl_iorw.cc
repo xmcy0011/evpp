@@ -51,8 +51,7 @@ namespace evpp {
         //SSL_read
         ssize_t SSL_read(SSL *ssl, Buffer *buf, int *savedErrno) {
             assert(buf->WritableBytes() >= 0);
-            LOG_TRACE << "ssl_iorw::SSL_read SSL_pending = %d" << SSL_pending(ssl);
-            LOG_TRACE << "ssl_iorw::SSL_read begin {{{\n\n";
+            LOG_TRACE << "ssl_iorw::SSL_read SSL_pending = " << SSL_pending(ssl);
             ssize_t n = 0;
             do {
                 //make sure that writable > 0
@@ -153,13 +152,13 @@ namespace evpp {
                     break;
                 }
             } while (true);
-            LOG_TRACE << "ssl_iorw::SSL_read end }}}\n\n";
             return n;
         }//SSL_read
 
         //SSL_write
         ssize_t SSL_write(SSL *ssl, void const *data, size_t len, int *savedErrno) {
             //printf("\nssl_iorw::SSL_read SSL_write {{{\n");
+            assert(len > 0);
             ssize_t left = (ssize_t) len;
             ssize_t n = 0;
             while (left > 0) {
@@ -217,7 +216,6 @@ namespace evpp {
                     break;
                 }
             }
-            LOG_TRACE << "ssl_iorw::SSL_write end }}}\n\n";
             return n;
         }//SSL_write
 
