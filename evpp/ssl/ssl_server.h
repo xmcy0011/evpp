@@ -26,7 +26,7 @@ namespace evpp {
 
 // We can use this class to create a TCP server.
 // The typical usage is :
-//      1. Create a TCPServer object
+//      1. Create a SslServer object
 //      2. Set the message callback and connection callback
 //      3. Call TCPServer::Init()
 //      4. Call TCPServer::Start()
@@ -35,25 +35,34 @@ namespace evpp {
 //
 // The examples code is as bellow:
 // <code>
-//     std::string addr = "0.0.0.0:9099";
-//     int thread_num = 4;
-//     evpp::EventLoop loop;
-//     evpp::ssl::TCPServer server(&loop, addr, "TCPEchoServer", thread_num);
-//     server.SetMessageCallback([](const evpp::TCPConnPtr& conn,
-//                                  evpp::Buffer* msg) {
-//         // Do something with the received message
-//         conn->Send(msg); // At here, we just send the received message back.
-//     });
-//     server.SetConnectionCallback([](const evpp::TCPConnPtr& conn) {
-//         if (conn->IsConnected()) {
-//             LOG_INFO << "A new connection from " << conn->remote_addr();
-//         } else {
-//             LOG_INFO << "Lost the connection from " << conn->remote_addr();
-//         }
-//     });
-//     server.Init();
-//     server.Start();
-//     loop.Run();
+//    std::string addr = "0.0.0.0:8433";
+//    int thread_num = 4;
+//    evpp::EventLoop loop;
+//
+//    if (!evpp::ssl::SSL_CTX_Init("google.com.pem", "google.com.key")) {
+//        LOG_ERROR << "SSL_CTX_Init error";
+//        return 0;
+//    }
+//
+//    evpp::ssl::SSLServer server(&loop, addr, "TlsServer", thread_num, evpp::ssl::SSL_CTX_Get());
+//    server.SetMessageCallback([](const evpp::TCPConnPtr &conn,
+//                                 evpp::Buffer *msg) {
+//        LOG_INFO << "recv client msg:len=" << msg->length() << ",content=" << msg->ToString();
+//        // Do something with the received message
+//        conn->Send(msg); // At here, we just send the received message back.
+//    });
+//    server.SetConnectionCallback([](const evpp::TCPConnPtr &conn) {
+//        if (conn->IsConnected()) {
+//            LOG_INFO << "A new connection from " << conn->remote_addr();
+//        } else {
+//            LOG_INFO << "Lost the connection from " << conn->remote_addr();
+//        }
+//    });
+//    server.Init();
+//    server.Start();
+//    loop.Run();
+//
+//    evpp::ssl::SSL_CTX_free();
 // </code>
 //
         class EVPP_EXPORT SSLServer : public ThreadDispatchPolicy, public ServerStatus {

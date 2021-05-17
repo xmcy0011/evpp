@@ -32,7 +32,7 @@ namespace evpp {
                   const std::string &remote_addr/*host:port*/,
                   const std::string &name);
 
-        ~TCPClient();
+        virtual ~TCPClient();
 
         // @brief We can bind a local address. This is an optional operation.
         //  If necessary, it should be called before doing Connect().
@@ -43,7 +43,7 @@ namespace evpp {
         //  If the connection callback is set properly it will be invoked when
         //  the connection is established successfully or timeout or cannot
         //  establish a connection.
-        void Connect();
+        virtual void Connect();
 
         // @brief Disconnect from the remote server. When the connection is
         //  broken down, the connection callback will be invoked.
@@ -115,17 +115,20 @@ namespace evpp {
             return loop_;
         }
 
-    private:
+    protected:
         void DisconnectInLoop();
 
-        void OnConnection(evpp_socket_t sockfd, const std::string &laddr);
+        virtual void OnConnection(evpp_socket_t sockfd, const std::string &laddr);
 
         void OnRemoveConnection(const TCPConnPtr &conn);
 
         void Reconnect();
 
-    private:
+    protected:// mod_by xmcy0011@sina.com openssl support
+        std::shared_ptr<Connector> connector_;
         EventLoop *loop_;
+
+    protected:
         std::string local_addr_; // If the local address is not empty, we will bind to this local address before doing connect()
         std::string remote_addr_; // host:port
         std::string name_;
@@ -137,7 +140,6 @@ namespace evpp {
         mutable std::mutex mutex_; // The guard of conn_
         TCPConnPtr conn_;
 
-        std::shared_ptr<Connector> connector_;
         Duration connecting_timeout_ = Duration(3.0); // Default : 3 seconds
 
         ConnectionCallback conn_fn_;

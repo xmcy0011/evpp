@@ -9,7 +9,6 @@
 #include "evpp/any.h"
 #include "evpp/duration.h"
 
-#include "evpp/ssl/ssl_server.h"
 #include <openssl/ssl.h>
 
 namespace evpp {
@@ -21,6 +20,12 @@ namespace evpp {
     class TCPClient;
 
     class InvokeTimer;
+
+    namespace ssl {
+        class SSLServer;
+
+        class SSLClient;
+    }
 
     class EVPP_EXPORT TCPConn : public std::enable_shared_from_this<TCPConn> {
     public:
@@ -41,7 +46,8 @@ namespace evpp {
                 const std::string &laddr,
                 const std::string &raddr,
                 uint64_t id,
-                SSL_CTX *ctx = nullptr);
+                SSL_CTX *ctx = nullptr,
+                SSL *ssl = nullptr);
 
         ~TCPConn();
 
@@ -168,6 +174,8 @@ namespace evpp {
 
         friend class evpp::ssl::SSLServer;
 
+        friend class evpp::ssl::SSLClient;
+
         // These methods are visible only for TCPClient and TCPServer.
         // We don't want the user layer to access these methods.
         void set_type(Type t) {
@@ -211,7 +219,7 @@ namespace evpp {
 
     private:
         // added_by xmcy0011@sina.com support ssl
-        bool enable_ssl_;
+        bool enable_server_ssl_;
         SSL *ssl_;
         SSL_CTX *ssl_ctx_;
         std::atomic<bool> sslConnected_;

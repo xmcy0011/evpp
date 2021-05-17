@@ -6,7 +6,9 @@
 #include "evpp/fd_channel.h"
 #include "evpp/event_loop.h"
 #include "evpp/sockets.h"
-#include "evpp/invoke_timer.h"
+
+#include "evpp/ssl/ssl_client.h"
+#include "evpp/ssl/ssl_server.h"
 
 namespace evpp {
     TCPConn::TCPConn(EventLoop *l,
@@ -15,8 +17,9 @@ namespace evpp {
                      const std::string &laddr,
                      const std::string &raddr,
                      uint64_t conn_id,
-                     SSL_CTX *ctx)
-            : ssl_(nullptr),
+                     SSL_CTX *ctx,
+                     SSL *ssl)
+            : ssl_(ssl),
               ssl_ctx_(ctx),
               sslConnected_(false),
               loop_(l),
@@ -26,7 +29,7 @@ namespace evpp {
               local_addr_(laddr),
               remote_addr_(raddr),
               type_(kIncoming),
-              enable_ssl_(false),
+              enable_server_ssl_(false),
               status_(kDisconnected) {
         if (sockfd >= 0) {
             chan_.reset(new FdChannel(l, sockfd, false, false));
@@ -37,7 +40,8 @@ namespace evpp {
         DLOG_TRACE << "TCPConn::[" << name_ << "] channel=" << chan_.get() << " fd=" << sockfd << " addr="
                    << AddrToString();
 
-        enable_ssl_ = ssl_ctx_ != nullptr;
+        // server ssl if ssl_ is null
+        enable_server_ssl_ = ssl_ctx_ != nullptr && ssl_ == nullptr;
     }
 
     TCPConn::~TCPConn() {
@@ -140,7 +144,7 @@ namespace evpp {
         // if no data in output queue, writing directly
         if (!chan_->IsWritable() && output_buffer_.length() == 0) {
             int serrno = errno;
-            if (enable_ssl_) {
+            if (ssl_) {
                 nwritten = evpp::ssl::SSL_write(ssl_, data, len, &serrno);
                 switch (serrno) {
                     case SSL_ERROR_WANT_WRITE:
@@ -204,18 +208,42 @@ namespace evpp {
         assert(loop_->IsInLoopThread());
 
         // 启用SSL时，处理SSL握手
-        if (enable_ssl_ && !sslConnected_) {
+        if (enable_server_ssl_ && !sslConnected_) {
             HandleSSLHandshake();
             return;
         }
 
         // add openssl support
         int serrno = 0;
-        ssize_t n = !enable_ssl_ ?
+        ssize_t n = !ssl_ ?
                     input_buffer_.ReadFromFD(chan_->fd(), &serrno) :
                     evpp::ssl::SSL_read(ssl_, &input_buffer_, &serrno);
         if (n > 0) {
             msg_fn_(shared_from_this(), &input_buffer_);
+        }
+
+        // deal SSL_ERROR_WANT_READ/SSL_ERROR_WANT_WRITE
+        // 这里如果不这么处理，则导致接收数据不完整，从而出错
+        if (ssl_) {
+            switch (serrno) {
+                case SSL_ERROR_WANT_READ:
+                    chan_->EnableReadEvent();
+                    break;
+                case SSL_ERROR_WANT_WRITE:
+                    chan_->EnableWriteEvent();
+                    break;
+                case SSL_ERROR_ZERO_RETURN:
+                    HandleError();
+                    break;
+                case SSL_ERROR_SSL:
+                    HandleError();
+                    break;
+                case 0:
+                    break;
+                default:
+                    HandleError();
+                    break;
+            }
         } else if (n == 0) { // remote close the connection
             if (type() == kOutgoing) {
                 // This is an outgoisslsssng connection, we own it and it's done. so close it
@@ -249,6 +277,8 @@ namespace evpp {
                 HandleError();
             }
         }
+
+
     }
 
     void TCPConn::HandleWrite() {
@@ -257,7 +287,7 @@ namespace evpp {
 
         // 处理OpenSSL握手的情况，这里可能存在重新协商的问题
         // 参考：https://github.com/chengwuloo/websocket
-        if (enable_ssl_ && !sslConnected_) {
+        if (enable_server_ssl_ && !sslConnected_) {
             DLOG_WARN << "HandleWrite need SSL_handshake";
             HandleSSLHandshake();
             return;
@@ -265,7 +295,7 @@ namespace evpp {
 
         // add openssl support
         int serrno = errno;
-        ssize_t n = !enable_ssl_ ?
+        ssize_t n = !ssl_ ?
                     ::send(fd_, output_buffer_.data(), output_buffer_.length(), MSG_NOSIGNAL) :
                     evpp::ssl::SSL_write(ssl_, output_buffer_.data(), output_buffer_.length(), &serrno);
         if (n > 0) {
@@ -308,7 +338,7 @@ namespace evpp {
         assert(status_ == kDisconnecting);
 
         // openssl support
-        if (enable_ssl_ && ssl_ != nullptr) {
+        if (ssl_ != nullptr) {
             evpp::ssl::SSL_free(ssl_);
         }
 

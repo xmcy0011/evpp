@@ -22,7 +22,7 @@ namespace evpp {
 
     TCPClient::~TCPClient() {
         DLOG_TRACE;
-        assert(!connector_.get());
+        //assert(!connector_.get());
         auto_reconnect_.store(false);
         TCPConnPtr c = conn();
         if (c) {
