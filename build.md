@@ -32,3 +32,52 @@ $ git submodule update --init --recursive
 
 1. Clion打开evpp目录
 2. Build->Build Project
+
+## SSL证书生成
+
+生成自签名证书命令如下：
+1. 生成私钥
+```bash
+$ openssl genrsa -out google.com.key 2048
+```
+
+2. 生成CSR（证书签名请求）
+```bash
+$ openssl req -new -out google.com.csr -key google.com.key
+
+Country Name (2 letter code) [AU]:CN
+State or Province Name (full name) [Some-State]:Shanghai
+Locality Name (eg, city) []:Shanghai
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:Google Ltd
+Organizational Unit Name (eg, section) []:google.com
+Common Name (e.g. server FQDN or YOUR name) []:*.google.com #这一项必须和你的域名一致
+Email Address []:kefu@google.com
+A challenge password []:fG!#tRru
+An optional company name []:Google.com
+```
+3. 生成自签名证书（100年过期）
+```bash
+$ openssl x509 -req -in google.com.csr -out google.com.cer -signkey google.com.key CAcreateserial -days 36500
+```
+
+4. 生成服务器crt格式证书
+```bash
+$ openssl x509 -inform PEM -in google.com.cer -out google.com.crt
+```
+
+5. 生成PEM公钥
+```bash
+$ openssl x509 -in google.com.crt -outform PEM -out google.com.pem
+```
+
+最后，google.com.pem 和 google.com.key 是本程序需要的 公钥和私钥
+
+附录：
+- 生成IOS客户端p12格式根证书（输入密码fG!#tRru）
+```bash
+$ openssl pkcs12 -export -clcerts -in google.com.cer -inkey google.com.key -out google.com.p12
+```
+- 生成Android客户端bks格式证书
+```bash
+# $ 略
+```

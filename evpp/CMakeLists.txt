@@ -11,7 +11,7 @@ file(GLOB evpp_SSL_PUBLIC_HEADERS ssl/*.h)
 
 message(STATUS "evpp_SRCS : " ${evpp_SRCS})
 
-set (MACOSX_RPATH ${LIBRARY_OUTPUT_PATH})
+set(MACOSX_RPATH ${LIBRARY_OUTPUT_PATH})
 
 include_directories(${PROJECT_SOURCE_DIR})
 
@@ -19,24 +19,38 @@ add_library(evpp_static STATIC ${evpp_SRCS})
 target_link_libraries(evpp_static ${DEPENDENT_LIBRARIES})
 
 if (HTTPS)
-add_library(evpp_https_static STATIC ${evpp_SRCS})
-target_compile_definitions(evpp_https_static PRIVATE -DEVPP_HTTP_CLIENT_SUPPORTS_SSL)
-target_link_libraries(evpp_https_static ${DEPENDENT_LIBRARIES})
+    add_library(evpp_https_static STATIC ${evpp_SRCS})
+    target_compile_definitions(evpp_https_static PRIVATE -DEVPP_HTTP_CLIENT_SUPPORTS_SSL)
+    target_link_libraries(evpp_https_static ${DEPENDENT_LIBRARIES})
 endif (HTTPS)
 
+
+# added_s_by xmcy0011@sina.com 2021-05-17 openssl support
+find_package(OpenSSL REQUIRED)
+if (OpenSSL_FOUND)
+    MESSAGE(STATUS "Openssl in ${OPENSSL_DEFINITIONS}")
+    MESSAGE(STATUS "Openssl in ${OPENSSL_INCLUDE_DIRS}")
+    MESSAGE(STATUS "Openssl in ${OPENSSL_LIBRARY_DIRS}")
+else ()
+    MESSAGE(STATUS "OpenSSL not found")
+endif (OpenSSL_FOUND)
+
+set(DEP_LIBS ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
+# added_e
+
 add_library(evpp_lite_static STATIC ${evpp_lite_SRCS})
-target_link_libraries(evpp_lite_static ${DEPENDENT_LIBRARIES})
+target_link_libraries(evpp_lite_static ${DEPENDENT_LIBRARIES} ${DEP_LIBS})
 
 if (UNIX)
-    add_library(evpp SHARED ${evpp_SRCS} ssl_server.h ssl_server.cpp)
-    target_link_libraries(evpp ${DEPENDENT_LIBRARIES})
+    add_library(evpp SHARED ${evpp_SRCS})
+    target_link_libraries(evpp ${DEPENDENT_LIBRARIES} ${DEP_LIBS})
 
     # boost lockfree queue
     add_library(evpp_boost SHARED ${evpp_SRCS})
     add_library(evpp_boost_static STATIC ${evpp_SRCS})
     target_compile_definitions(evpp_boost PRIVATE -DH_HAVE_BOOST=1)
     target_compile_definitions(evpp_boost_static PRIVATE -DH_HAVE_BOOST=1)
-    target_link_libraries(evpp_boost        ${DEPENDENT_LIBRARIES})
+    target_link_libraries(evpp_boost ${DEPENDENT_LIBRARIES})
     target_link_libraries(evpp_boost_static ${DEPENDENT_LIBRARIES})
 
     # https://github.com/cameron314/concurrentqueue
@@ -44,38 +58,38 @@ if (UNIX)
     add_library(evpp_concurrentqueue_static STATIC ${evpp_SRCS})
     target_compile_definitions(evpp_concurrentqueue PRIVATE -DH_HAVE_CAMERON314_CONCURRENTQUEUE=1)
     target_compile_definitions(evpp_concurrentqueue_static PRIVATE -DH_HAVE_CAMERON314_CONCURRENTQUEUE=1)
-    target_link_libraries(evpp_concurrentqueue        ${DEPENDENT_LIBRARIES})
+    target_link_libraries(evpp_concurrentqueue ${DEPENDENT_LIBRARIES})
     target_link_libraries(evpp_concurrentqueue_static ${DEPENDENT_LIBRARIES})
 
-    set (CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-    include (utils)
-    include (packages)
-    set_target_properties (
-        evpp evpp_boost evpp_concurrentqueue PROPERTIES
-        VERSION     "${PACKAGE_VERSION}"
-        SOVERSION   "${PACKAGE_SOVERSION}"
+    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+    include(utils)
+    include(packages)
+    set_target_properties(
+            evpp evpp_boost evpp_concurrentqueue PROPERTIES
+            VERSION "${PACKAGE_VERSION}"
+            SOVERSION "${PACKAGE_SOVERSION}"
     )
 
-    install (
-      TARGETS evpp evpp_static evpp_lite_static evpp_boost evpp_boost_static evpp_concurrentqueue evpp_concurrentqueue_static
-      EXPORT ${PACKAGE_NAME}
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
+    install(
+            TARGETS evpp evpp_static evpp_lite_static evpp_boost evpp_boost_static evpp_concurrentqueue evpp_concurrentqueue_static
+            EXPORT ${PACKAGE_NAME}
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
 
 else (UNIX)
-    install (
-      TARGETS evpp_static evpp_lite_static
-      EXPORT ${PACKAGE_NAME}
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib)
+    install(
+            TARGETS evpp_static evpp_lite_static
+            EXPORT ${PACKAGE_NAME}
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib)
 
 endif (UNIX)
 
-install (FILES ${evpp_PUBLIC_HEADERS} DESTINATION "include/evpp")
-install (FILES ${evpp_HTTP_PUBLIC_HEADERS} DESTINATION "include/evpp/http")
-install (FILES ${evpp_EVPPHTTP_PUBLIC_HEADERS} DESTINATION "include/evpp/evpphttp")
-install (FILES ${evpp_HTTPC_PUBLIC_HEADERS} DESTINATION "include/evpp/httpc")
-install (FILES ${evpp_UDP_PUBLIC_HEADERS} DESTINATION "include/evpp/udp")
-install (FILES ${evpp_SSL_PUBLIC_HEADERS} DESTINATION "include/evpp/ssl")
+install(FILES ${evpp_PUBLIC_HEADERS} DESTINATION "include/evpp")
+install(FILES ${evpp_HTTP_PUBLIC_HEADERS} DESTINATION "include/evpp/http")
+install(FILES ${evpp_EVPPHTTP_PUBLIC_HEADERS} DESTINATION "include/evpp/evpphttp")
+install(FILES ${evpp_HTTPC_PUBLIC_HEADERS} DESTINATION "include/evpp/httpc")
+install(FILES ${evpp_UDP_PUBLIC_HEADERS} DESTINATION "include/evpp/udp")
+install(FILES ${evpp_SSL_PUBLIC_HEADERS} DESTINATION "include/evpp/ssl")

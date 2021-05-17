@@ -9,7 +9,7 @@
 #include "evpp/any.h"
 #include "evpp/duration.h"
 
-#include "evpp/ssl/ssl.h"
+#include "evpp/ssl/ssl_server.h"
 #include <openssl/ssl.h>
 
 namespace evpp {
@@ -21,8 +21,6 @@ namespace evpp {
     class TCPClient;
 
     class InvokeTimer;
-
-    class SSLServer;
 
     class EVPP_EXPORT TCPConn : public std::enable_shared_from_this<TCPConn> {
     public:
@@ -168,7 +166,7 @@ namespace evpp {
 
         friend class TCPServer;
 
-        friend class SSLServer;
+        friend class evpp::ssl::SSLServer;
 
         // These methods are visible only for TCPClient and TCPServer.
         // We don't want the user layer to access these methods.

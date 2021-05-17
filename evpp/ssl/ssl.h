@@ -32,9 +32,10 @@ namespace evpp {
     namespace ssl {
 
         //SSL_CTX_Init
-        void EVPP_EXPORT SSL_CTX_Init(
+        bool EVPP_EXPORT SSL_CTX_Init(
                 std::string const &cert_path,
                 std::string const &private_key_path,
+                std::string const &password = "",
                 std::string const &client_ca_cert_file_path = "",
                 std::string const &client_ca_cert_dir_path = "");
 

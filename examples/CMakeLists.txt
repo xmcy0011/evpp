@@ -1,14 +1,22 @@
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/3rdparty)
 
+# added_by xmcy0011@sina.com 2021-05-17 openssl example
+find_package(OpenSSL REQUIRED)
+if (OpenSSL_FOUND)
+    set(DEP_LIBS ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
+else ()
+    MESSAGE(STATUS "Openssl not find")
+endif (OpenSSL_FOUND)
 
-set(LIBRARIES evpp_static ${DEPENDENT_LIBRARIES})
+set(LIBRARIES evpp_static ${DEPENDENT_LIBRARIES} ${DEP_LIBS})
 if (UNIX)
-else(UNIX)
-link_directories(${PROJECT_SOURCE_DIR}/vsprojects/bin/${CMAKE_BUILD_TYPE}/
-				 ${PROJECT_SOURCE_DIR}/3rdparty/glog-0.3.4/${CMAKE_BUILD_TYPE})
-endif(UNIX)
+else (UNIX)
+    link_directories(${PROJECT_SOURCE_DIR}/vsprojects/bin/${CMAKE_BUILD_TYPE}/
+            ${PROJECT_SOURCE_DIR}/3rdparty/glog-0.3.4/${CMAKE_BUILD_TYPE})
+endif (UNIX)
 
-add_subdirectory(apps)
+# del_by xmcy0011@sina.com 2021-05-17 disabled apps example
+#add_subdirectory(apps)
 add_subdirectory(chatroom)
 add_subdirectory(recipes)
 add_subdirectory(http)
@@ -34,6 +42,12 @@ target_link_libraries(example_tcp_client ${LIBRARIES})
 
 add_executable(example_tcp_server tcp/tcp_server.cc)
 target_link_libraries(example_tcp_server ${LIBRARIES})
+
+add_executable(example_tls_client tls/tls_client.cpp)
+target_link_libraries(example_tls_client ${LIBRARIES} ${DEP_LIBS})
+
+add_executable(example_tls_server tls/tls_server.cpp)
+target_link_libraries(example_tls_server ${LIBRARIES} ${DEP_LIBS})
 
 add_executable(example_multi_accept multi_accept/main.cc)
 target_link_libraries(example_multi_accept ${LIBRARIES})

@@ -385,51 +385,52 @@ namespace evpp {
         }
 
         //SSL_CTX_setup_certs 加载CA证书
-        static inline void SSL_CTX_setup_certs(
+        static inline bool SSL_CTX_setup_certs(
                 std::string const &cert_path,
                 std::string const &private_key_path,
+                std::string const &password,
                 std::string const &client_ca_cert_file_path,
                 std::string const &client_ca_cert_dir_path) {
             if (cert_path.empty() || private_key_path.empty()) {
-                //printf("SSL_CTX_setup_certs failed\n");
-                return;
+                LOG_ERROR << "SSL_CTX_setup_certs failed: empty cert or private key path";
+                return false;
             }
-            //SSL_CTX_create ///
+            //SSL_CTX_create
             if (!ssl::SSL_CTX_create()) {
-                return;
+                LOG_ERROR << "SSL_CTX_create failed";
+                return false;
             }
-            printf("Loading certificate-chain from '%s'\n" \
-                    "and private-key from '%s'\n",
-                   cert_path.c_str(), private_key_path.c_str());
+            LOG_TRACE << "Loading certificate-chain from " << cert_path.c_str() << "\n" \
+                    "and private-key from " << private_key_path.c_str();
 #if 1
             //为SSL会话加载本应用的证书所属的证书链
             if (::SSL_CTX_use_certificate_chain_file(ssl_ctx_, cert_path.c_str()) != 1) {
-                printf("SSL_CTX_use_certificate_chain_file failed\n");
+                LOG_ERROR << "SSL_CTX_use_certificate_chain_file failed";
                 ssl::SSL_CTX_free();
-                return;
+                return false;
             }
 #else
             //为SSL会话加载本应用的证书*.cer
             if (::SSL_CTX_use_certificate_file(ssl_ctx_, cert_path.c_str(), SSL_FILETYPE_PEM) != 1) {
-                printf("SSL_CTX_use_certificate_file failed\n");
+                LOG_ERROR << "SSL_CTX_use_certificate_file failed";
                 ssl::SSL_CTX_free();
-                return;
+                return false;
             }
 #endif
-            std::string passwd("");
-            ::SSL_CTX_set_default_passwd_cb_userdata(ssl_ctx_, static_cast<void *>(const_cast<char *>(passwd.c_str())));
+            ::SSL_CTX_set_default_passwd_cb_userdata(ssl_ctx_,
+                                                     static_cast<void *>(const_cast<char *>(password.c_str())));
 
             //为SSL会话加载本应用的私钥
             if (::SSL_CTX_use_PrivateKey_file(ssl_ctx_, private_key_path.c_str(), SSL_FILETYPE_PEM) != 1) {
-                printf("SSL_CTX_use_PrivateKey_file failed\n");
+                LOG_ERROR << "SSL_CTX_use_PrivateKey_file failed";
                 ssl::SSL_CTX_free();
-                return;
+                return false;
             }
             //验证所加载的私钥和证书是否相匹配
             if (::SSL_CTX_check_private_key(ssl_ctx_) != 1) {
-                printf("SSL_CTX_check_private_key failed\n");
+                LOG_ERROR << "SSL_CTX_check_private_key failed";
                 ssl::SSL_CTX_free();
-                return;
+                return false;
             }
             if (!client_ca_cert_file_path.empty() || !client_ca_cert_dir_path.empty()) {
 #if 0
@@ -458,18 +459,20 @@ namespace evpp {
 #endif
             }
 
-
+            return true;
         }
 
         //SSL_CTX_Init
-        void SSL_CTX_Init(
+        bool SSL_CTX_Init(
                 std::string const &cert_path,
                 std::string const &private_key_path,
+                std::string const &password,
                 std::string const &client_ca_cert_file_path,
                 std::string const &client_ca_cert_dir_path) {
-            ssl::SSL_CTX_setup_certs(
+            return ssl::SSL_CTX_setup_certs(
                     cert_path,
                     private_key_path,
+                    password,
                     client_ca_cert_file_path,
                     client_ca_cert_dir_path);
         }
