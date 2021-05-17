@@ -203,6 +203,8 @@ namespace evpp {
 
         void HandleError();
 
+        void HandleSSLHandshake();
+
         void SendInLoop(const Slice &message);
 
         void SendInLoop(const void *data, size_t len);
@@ -211,9 +213,10 @@ namespace evpp {
 
     private:
         // added_by xmcy0011@sina.com support ssl
+        bool enable_ssl_;
         SSL *ssl_;
         SSL_CTX *ssl_ctx_;
-        bool sslConnected_;
+        std::atomic<bool> sslConnected_;
         //WsContextPtr wsContext_;
 
     private:

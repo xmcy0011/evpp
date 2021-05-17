@@ -266,35 +266,6 @@ namespace evpp {
         static SSL_CTX *ssl_ctx_;
 
         //SSL_library_init
-        //static inline void SSL_library_init();
-
-        //SSL_library_free
-        //static inline void SSL_library_free();
-
-        //SSL_CTX_create
-        //static inline bool SSL_CTX_create();
-
-        //SSL_CTX_setup_certs 加载CA证书
-        static inline void SSL_CTX_setup_certs(
-                std::string const &cert_path,
-                std::string const &private_key_path,
-                std::string const &client_ca_cert_file_path,
-                std::string const &client_ca_cert_dir_path);
-
-        //SSL_CTX_Init
-        void SSL_CTX_Init(
-                std::string const &cert_path,
-                std::string const &private_key_path,
-                std::string const &client_ca_cert_file_path,
-                std::string const &client_ca_cert_dir_path) {
-            ssl::SSL_CTX_setup_certs(
-                    cert_path,
-                    private_key_path,
-                    client_ca_cert_file_path,
-                    client_ca_cert_dir_path);
-        }
-
-        //SSL_library_init
         static inline void My_SSL_library_init() {
 #if OPENSSL_VERSION_NUMBER < 0x1010001fL
             CRYPTO_set_mem_functions(my_zeroing_malloc, realloc, free);
@@ -321,12 +292,6 @@ namespace evpp {
 #if OPENSSL_VERSION_NUMBER < 0x1010001fL
             ::ERR_free_strings();
 #endif
-        }
-
-        //SSL_CTX_Get
-        SSL_CTX *SSL_CTX_Get() {
-            //assert(ssl_ctx_);
-            return ssl_ctx_;
         }
 
         //SSL_CTX_create
@@ -492,6 +457,27 @@ namespace evpp {
                     std::min<size_t>(SSL_MAX_SSL_SESSION_ID_LENGTH, sid_ctx.length()));
 #endif
             }
+
+
+        }
+
+        //SSL_CTX_Init
+        void SSL_CTX_Init(
+                std::string const &cert_path,
+                std::string const &private_key_path,
+                std::string const &client_ca_cert_file_path,
+                std::string const &client_ca_cert_dir_path) {
+            ssl::SSL_CTX_setup_certs(
+                    cert_path,
+                    private_key_path,
+                    client_ca_cert_file_path,
+                    client_ca_cert_dir_path);
+        }
+
+        //SSL_CTX_Get
+        SSL_CTX *SSL_CTX_Get() {
+            //assert(ssl_ctx_);
+            return ssl_ctx_;
         }
     };//namespace ssl
 };//namespace evpp

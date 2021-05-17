@@ -17,6 +17,14 @@ evpp
 
 - 增加build.md文档
 - 增加evpp/ssl目录，支持SSL over TCP
+- 新增ssl_server.h/ssl_server.cpp，实现SSL Server
+- 修改tcp_conn，调用evpp/ssl下的SSL_handshake(),SSL_read(),SSL_write()实现ssl握手、数据加密发送和接收解密
+  - HandleRead()增加SSL握手；启用SSL的情况下，使用evpp::ssl::SSL_read()解密读取
+  - HandleClose()增加SSL的释放代码
+  - HandleWrite()增加SSL握手的判断；启用SSL的情况下，使用evpp::ssl::SSL_write()加密发送
+
+
+感谢 [chnegwuloo的基于muduo扩展的websocket和ssl server](https://github.com/chengwuloo/websocket)
 
 # 特性
 
