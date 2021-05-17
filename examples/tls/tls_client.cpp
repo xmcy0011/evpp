@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
     client.SetMessageCallback([&loop, &client](const evpp::TCPConnPtr& conn,
                                                evpp::Buffer* msg) {
         LOG_TRACE << "Receive a message [" << msg->ToString() << "]";
-        //client.Disconnect();
+        client.Disconnect();
     });
 
     client.SetConnectionCallback([](const evpp::TCPConnPtr& conn) {
