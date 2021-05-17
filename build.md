@@ -57,7 +57,7 @@ An optional company name []:Google.com
 ```
 3. 生成自签名证书（100年过期）
 ```bash
-$ openssl x509 -req -in google.com.csr -out google.com.cer -signkey google.com.key CAcreateserial -days 36500
+$ openssl x509 -req -in google.com.csr -out google.com.cer -signkey google.com.key -CAcreateserial -days 36500
 ```
 
 4. 生成服务器crt格式证书
