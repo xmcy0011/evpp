@@ -220,11 +220,9 @@ namespace evpp {
                     evpp::ssl::SSL_read(ssl_, &input_buffer_, &serrno);
         if (n > 0) {
             msg_fn_(shared_from_this(), &input_buffer_);
-        }
-
-        // deal SSL_ERROR_WANT_READ/SSL_ERROR_WANT_WRITE
-        // 这里如果不这么处理，则导致接收数据不完整，从而出错
-        if (ssl_) {
+        } else if (ssl_) { // <= 0 , 需要进一步处理SSL错误码
+            // deal SSL_ERROR_WANT_READ/SSL_ERROR_WANT_WRITE
+            // 这里如果不这么处理，则导致接收数据不完整，从而出错
             switch (serrno) {
                 case SSL_ERROR_WANT_READ:
                     chan_->EnableReadEvent();
@@ -232,15 +230,19 @@ namespace evpp {
                 case SSL_ERROR_WANT_WRITE:
                     chan_->EnableWriteEvent();
                     break;
-                case SSL_ERROR_ZERO_RETURN:
+                case SSL_ERROR_ZERO_RETURN://SSL has been shutdown，相当于原生write()返回0，代表对端关闭连接（正常情况）
+                    DLOG_TRACE << "SSL has been shutdown(" << serrno << ").";
                     HandleError();
                     break;
                 case SSL_ERROR_SSL:
+                    DLOG_TRACE << "SSL has error(" << serrno << ").";
                     HandleError();
                     break;
-                case 0:
+                case SSL_ERROR_NONE: // 0，have none error
+                    DLOG_TRACE << "SSL has error none";
                     break;
                 default:
+                    DLOG_TRACE << "SSL Connection has been aborted(" << serrno << ").";
                     HandleError();
                     break;
             }
@@ -269,16 +271,15 @@ namespace evpp {
                                                                                  shared_from_this())); // TODO leave it to user layer close.
                 }
             }
-        } else {
+        } else { // n < 0
             if (EVUTIL_ERR_RW_RETRIABLE(serrno)) {
                 DLOG_TRACE << "errno=" << serrno << " " << strerror(serrno);
             } else {
-                DLOG_TRACE << "errno=" << serrno << " " << strerror(serrno) << " We are closing this connection now.";
+                DLOG_TRACE << "errno=" << serrno << " " << strerror(serrno)
+                           << " We are closing this connection now.";
                 HandleError();
             }
         }
-
-
     }
 
     void TCPConn::HandleWrite() {
@@ -307,6 +308,30 @@ namespace evpp {
                 if (write_complete_fn_) {
                     loop_->QueueInLoop(std::bind(write_complete_fn_, shared_from_this()));
                 }
+            }
+        } else if (ssl_) { // <= 0 , check openssl error
+            switch (serrno) {
+                case SSL_ERROR_WANT_READ:
+                    chan_->EnableReadEvent();
+                    break;
+                case SSL_ERROR_WANT_WRITE:
+                    chan_->EnableWriteEvent();
+                    break;
+                case SSL_ERROR_ZERO_RETURN: //SSL has been shutdown，相当于原生write()返回0，代表对端关闭连接（正常情况）
+                    DLOG_TRACE << "SSL_write SSL has been shutdown(" << serrno << ").";
+                    HandleError();
+                    break;
+                case SSL_ERROR_NONE: // none error
+                    DLOG_TRACE << "SSL has error none";
+                    break;
+                case SSL_ERROR_SSL:
+                    DLOG_TRACE << "SSL_write has error(" << serrno << ").";
+                    HandleError();
+                    break;
+                default:
+                    DLOG_TRACE << "SSL_write Connection has been aborted(" << serrno << ").";
+                    HandleError();
+                    break;
             }
         } else {
             if (EVUTIL_ERR_RW_RETRIABLE(serrno)) {
@@ -432,4 +457,5 @@ namespace evpp {
             H_CASE_STRING(kDisconnecting);
         H_CASE_STRING_END();
     }
+
 }
