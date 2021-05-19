@@ -10,6 +10,7 @@
 #include "evpp/tcp_callbacks.h"
 
 #include "evpp/ssl/ssl.h"
+#include <random>
 
 namespace evpp {
     namespace ssl {
@@ -68,25 +69,42 @@ namespace evpp {
             SSL_set_fd(ssl, sockfd);
 
             // no-blocking io
-            while (-1 == SSL_connect(ssl)) {
-                fd_set fds;
-                FD_ZERO(&fds);
-                FD_SET(sockfd, &fds);
-                int ret = SSL_get_error(ssl, -1);
-                switch (ret) {
-                    case SSL_ERROR_WANT_READ:
-                    case SSL_ERROR_WANT_WRITE: {
-                        struct timeval t{};
-                        t.tv_sec = 0;
-                        t.tv_usec = 100 * 1000; // 100 ms
-                        select(sockfd + 1, &fds, nullptr, nullptr, &t);
-                        break;
+            std::random_device rd;
+            std::default_random_engine gen = std::default_random_engine(rd());
+            std::uniform_int_distribution<int> dis(5, 10);
+            int maxTimes = dis(gen); // 最大次数,5 - 10 次
+            int curTimes = 0;
+            int ret = -1;
+
+            while (curTimes < maxTimes) { // 100 - 200 ms超时
+                ret = SSL_connect(ssl);
+                if (ret == -1) {
+                    fd_set fds;
+                    FD_ZERO(&fds);
+                    FD_SET(sockfd, &fds);
+                    int ret = SSL_get_error(ssl, -1);
+                    switch (ret) {
+                        case SSL_ERROR_WANT_READ:
+                        case SSL_ERROR_WANT_WRITE: {
+                            struct timeval t{};
+                            t.tv_sec = 0;
+                            t.tv_usec = 100 * 1000; // 100 ms
+                            select(sockfd + 1, &fds, nullptr, nullptr, &t);
+                            curTimes++;
+                            break;
+                        }
+                        default:
+                            break;
                     }
-                    default:
-                        LOG_WARN << "SSL_connect error:" << ret;
-                        conn_fn_(TCPConnPtr(new TCPConn(loop_, "", sockfd, laddr, remote_addr_, 0)));
-                        return;
+                } else {
+                    break;
                 }
+            }
+
+            if (ret <= 0) {
+                LOG_WARN << "SSL_connect error:" << ret;
+                conn_fn_(TCPConnPtr(new TCPConn(loop_, "", sockfd, laddr, remote_addr_, 0)));
+                return;
             }
             LOG_TRACE << "doHandshake success";
             ShowCerts(ssl);
@@ -107,7 +125,7 @@ namespace evpp {
             c->OnAttachedToLoop();
         }
 
-        void SSLClient::ShowCerts(SSL* ssl) {
+        void SSLClient::ShowCerts(SSL *ssl) {
             X509 *cert;
             char *line;
             cert = SSL_get_peer_certificate(ssl);

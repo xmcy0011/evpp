@@ -7,7 +7,7 @@
 #include "evpp/ssl/ssl_client.h"
 
 int main(int argc, char* argv[]) {
-    std::string addr = "10.32.105.18:8433";
+    std::string addr = "127.0.0.1:8433";
     //std::string addr = "1127.0.0.1:8433";
 
     if (argc == 2) {

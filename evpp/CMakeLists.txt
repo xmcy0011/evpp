@@ -26,17 +26,9 @@ endif (HTTPS)
 
 
 # added_s_by xmcy0011@sina.com 2021-05-17 openssl support
+find_package(Libevent CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
-if (OpenSSL_FOUND)
-    MESSAGE(STATUS "Openssl in ${OPENSSL_DEFINITIONS}")
-    MESSAGE(STATUS "Openssl in ${OPENSSL_INCLUDE_DIRS}")
-    MESSAGE(STATUS "Openssl in ${OPENSSL_LIBRARY_DIRS}")
-else ()
-    MESSAGE(STATUS "OpenSSL not found")
-endif (OpenSSL_FOUND)
-
-set(DEP_LIBS ${OPENSSL_SSL_LIBRARY} ${OPENSSL_CRYPTO_LIBRARY})
-# added_e
+find_package(glog CONFIG REQUIRED)
 
 add_library(evpp_lite_static STATIC ${evpp_lite_SRCS})
 target_link_libraries(evpp_lite_static ${DEPENDENT_LIBRARIES} ${DEP_LIBS})

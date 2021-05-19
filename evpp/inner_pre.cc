@@ -19,6 +19,8 @@
 namespace evpp {
 
     namespace {
+
+#ifndef __APPLE__ // mod_by xmcy0011@sina.com fixed crash in macos
         struct OnStartup {
             OnStartup() {
 #ifndef H_OS_WINDOWS
@@ -33,6 +35,8 @@ namespace evpp {
             ~OnStartup() {
             }
         } __s_onstartup;
+#endif
+
     }
 
 
