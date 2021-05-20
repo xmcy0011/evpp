@@ -300,22 +300,8 @@ namespace evpp {
             if (!ssl_ctx_) {
                 //openSSL库初始化 ///
                 ssl::My_SSL_library_init();
-                //////////////////////////////////////////////////////////////////////////
-                //SSLv2版本 SSLv2_server_method SSLv2_client_method
-                //SSL/TLS版本 SSLv23_server_method SSLv23_client_method
-                //SSLv3版本 SSLv3_server_method SSLv3_client_method
-                //
-                //TLSv1.0版本 TLSv1_server_method TLSv1_client_method
-                //TLSv1.1版本 TLSv1_1_server_method TLSv1_1_client_method
-                //TLSv1.2版本 TLSv1_2_server_method TLSv1_2_client_method
-                //
-                //DTLSv1.0版本 DTLSv1_server_method DTLSv1_client_method
-                //DTLSv1.2版本 DTLSv1_2_server_method DTLSv1_2_client_method
-                //
-                //DTLS1.0/1.2版本 DTLS_server_method DTLS_client_method
-                //////////////////////////////////////////////////////////////////////////
                 //创建SSL_CTX
-                ssl_ctx_ = ::SSL_CTX_new(SSLv23_server_method());
+                ssl_ctx_ = ::SSL_CTX_new(TLS_server_method());
                 if (!ssl_ctx_) {
                     printf("SSL_CTX_new failed\n");
                     ssl::SSL_library_free();

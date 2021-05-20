@@ -15,17 +15,21 @@
 namespace evpp {
     namespace ssl {
         std::atomic<uint64_t> g_ssl_id_(0);
+        std::atomic_bool g_ssl_initialized(false);
 
         SSLClient::SSLClient(EventLoop *loop, const std::string &remote_addr, const std::string &name)
                 : TCPClient(loop, remote_addr, name),
                   ssl_ctx_(nullptr) {
 
-            SSL_library_init();
-            OpenSSL_add_all_algorithms();
-            SSL_load_error_strings();
+            if (!g_ssl_initialized) {
+                g_ssl_initialized = true;
+                SSL_library_init();
+                OpenSSL_add_all_algorithms();
+                SSL_load_error_strings();
+            }
 
             // create SSL_CTX
-            const SSL_METHOD *method = SSLv23_client_method();
+            const SSL_METHOD *method = TLS_client_method();
             ssl_ctx_ = SSL_CTX_new(method);
             assert(ssl_ctx_);
         }
