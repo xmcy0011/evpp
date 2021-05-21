@@ -9,7 +9,13 @@
 #define H_CASE_STRING_END()  default:return "Unknown";break;}
 #endif
 
+#ifdef H_OS_WINDOWS
+
+#include <windows.h>
+
+#else
 #include <unistd.h>
+#endif
 
 namespace evpp {
 
@@ -56,12 +62,43 @@ namespace evpp {
         } while (pos != StringType::npos);
     }
 
+#ifdef H_OS_WINDOWS
+
+    /**@fn stringToWstring
+      *@brief 转换
+      *@return
+      */
+    inline std::wstring stringToWstring(const std::string &str) {
+        LPCSTR pszSrc = str.c_str();
+        int nLen = MultiByteToWideChar(CP_ACP, 0, pszSrc, -1, nullptr, 0);
+        if (nLen == 0)
+            return (std::wstring(L""));
+
+        auto *dst = new wchar_t[nLen];
+
+        MultiByteToWideChar(CP_ACP, 0, pszSrc, -1, dst, nLen);
+        std::wstring wstr(dst);
+        delete[] dst;
+
+        return (wstr);
+    }
+
+#endif
+
     /**@fn FilePathIsExist
       *@brief 检测文件路径是否存在
       *@param file_name：文件路径
       *@return
       */
     inline bool FilePathIsExist(const std::string &file_name) {
+#ifdef H_OS_WINDOWS
+        const DWORD file_attr = ::GetFileAttributesW(stringToWstring(file_name).c_str());
+        if (file_attr != INVALID_FILE_ATTRIBUTES) {
+            return true;
+        }
+        return false;
+#else
         return ::access(file_name.c_str(), 0) == F_OK;
+#endif
     }
 }
