@@ -25,6 +25,52 @@ $ vcpkg install boost
 $ -DCMAKE_TOOLCHAIN_FILE=/home/xuyc/data/vcpkg/scripts/buildsystems/vcpkg.cmake
 ```
 
+## Centos 7
+
+1. cmake
+```bash
+$ yum install cmake # 2.8 需要升级为3
+$ wget https://cmake.org/files/v3.18/cmake-3.18.2.tar.gz
+$ tar -zxvf cmake-3.18.2.tar.gz
+$ cd cmake-3.18.2
+$ ./bootstrap
+$ gmake && sudo gmake install
+$ /usr/local/bin/cmake --version
+$ ln -s /usr/local/bin/cmake /usr/bin/ # 建立软连接
+$ cmake --version
+```
+
+2. libevent
+```bash
+$ yum install libevent-devel
+```
+
+3. glog
+```bash
+$ git clone https://github.com/google/glog.git
+$ cd glog
+$ cmake -S . -B build -G "Unix Makefiles"
+$ cmake --build build                        # build
+$ sudo cmake --build build --target install  # install
+```
+
+4. openssl
+```bash
+$ yum install openssl-devel
+```
+
+5. boost
+```bash
+$ yum install boost-devel
+```
+
+6. git clone
+```bash
+$ git clone https://github.com/xmcy0011/evpp.git
+$ cd evpp
+$ git submodule update --init --recursive
+```
+
 ## Ubuntu
 
 1. glog
