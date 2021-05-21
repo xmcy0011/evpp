@@ -61,6 +61,9 @@ $ cd glog
 $ cmake -S . -B build -G "Unix Makefiles"
 $ cmake --build build                        # build
 $ sudo cmake --build build --target install  # install
+
+# copy to system
+$ sudo cp /usr/local/lib/libglog.so* /lib64/
 ```
 
 4. openssl
