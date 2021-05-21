@@ -30,15 +30,6 @@ if (UNIX)
     include_directories(${PROJECT_SOURCE_DIR}
             ${PROJECT_SOURCE_DIR}/3rdparty)
 
-    # added_by xmcy0011@sina.com mac上使用vcpkg的头文件和库
-    if (APPLE)
-        set(VcpkgRoot ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET})
-        include_directories(${VcpkgRoot}/include
-                ${PROJECT_SOURCE_DIR}
-                ${PROJECT_SOURCE_DIR}/3rdparty/wininclude)
-        message("vcpkg root=${VcpkgRoot}")
-        link_directories(${VcpkgRoot}/lib)
-    endif (APPLE)
 else (UNIX)
     set(CXX_FLAGS -DWIN32 -D_WIN32 -EHsc)
     set(VcpkgRoot ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET})
@@ -65,8 +56,8 @@ if (UNIX)
                 OpenSSL::SSL OpenSSL::Crypto
                 glog::glog
                 pthread)
-    elseif (APPLE)
-        SET(DEPENDENT_LIBRARIES event glog pthread)
+    else (APPLE)
+        SET(DEPENDENT_LIBRARIES event glog pthread ssl crypto)
     endif (APPLE)
 else (UNIX)
     SET(DEPENDENT_LIBRARIES event glog)
@@ -106,15 +97,12 @@ message(STATUS "THRIFT_INCLUDE_DIR " ${THRIFT_INCLUDE_DIR})
 message(STATUS "THRIFT_LIBRARY " ${THRIFT_LIBRARY})
 
 add_subdirectory(evpp)
-
-# 不生成 其他项目
-
 #add_subdirectory (apps)
 #add_subdirectory (labs)
-#
+
 #if (NOT EVPP_VCPKG_BUILD)
 #    add_subdirectory (test)
-    add_subdirectory (examples)
+add_subdirectory(examples)
 #    add_subdirectory (benchmark)
 #endif ()
 #

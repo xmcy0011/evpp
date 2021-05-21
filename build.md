@@ -1,6 +1,31 @@
 # Build
 
-## Base
+## Use Vcpkg
+
+1. vcpkg
+```bash
+$ git clone https://github.com/Microsoft/vcpkg.git
+$ cd vcpkg 
+$ sudo ./bootstrap-vcpkg.sh
+$ vim ~/.bashrc
+# vcpkg
+export PATH=/home/jack/data/vcpkg:$PATH
+```
+
+2. 使用vcpkg 安装依赖
+```bash
+$ vcpkg install libevent
+$ vcpkg install glog
+$ vcpkg install openssl
+$ vcpkg install boost
+```
+
+3. build
+```bash
+$ -DCMAKE_TOOLCHAIN_FILE=/home/xuyc/data/vcpkg/scripts/buildsystems/vcpkg.cmake
+```
+
+## Ubuntu
 
 1. glog
 ```bash
@@ -21,17 +46,21 @@ $ sudo apt-get install libboost-thread1.71-dev
 $ sudo apt-get install libboost-atomic1.71-dev
 ```
 
-4. git clone 
+4. openssl
+```bash
+$ sudo apt-get install openssl
+```
+
+5. git clone 
 ```bash
 $ git clone https://github.com/xmcy0011/evpp.git
 $ cd evpp
 $ git submodule update --init --recursive
 ```
 
-## Ubuntu 20
-
-1. Clion打开evpp目录
-2. Build->Build Project
+5. clion
+    1. Clion打开evpp目录
+    2. Build->Build Project
 
 ## SSL证书生成
 

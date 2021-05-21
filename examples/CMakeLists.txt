@@ -1,9 +1,11 @@
 include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/3rdparty)
 
 # added_s_by xmcy0011@sina.com 2021-05-17 openssl example
-find_package(OpenSSL REQUIRED)
-find_package(Libevent CONFIG REQUIRED)
-find_package(glog CONFIG REQUIRED)
+if (APPLE)
+    find_package(OpenSSL REQUIRED)
+    find_package(Libevent CONFIG REQUIRED)
+    find_package(glog CONFIG REQUIRED)
+endif ()
 # added_e
 
 set(LIBRARIES evpp_static ${DEPENDENT_LIBRARIES} ${DEP_LIBS})

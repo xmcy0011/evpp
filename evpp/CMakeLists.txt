@@ -26,9 +26,11 @@ endif (HTTPS)
 
 
 # added_s_by xmcy0011@sina.com 2021-05-17 openssl support
-find_package(Libevent CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
-find_package(glog CONFIG REQUIRED)
+if (apple)
+    find_package(Libevent CONFIG REQUIRED)
+    find_package(OpenSSL REQUIRED)
+    find_package(glog CONFIG REQUIRED)
+endif ()
 
 add_library(evpp_lite_static STATIC ${evpp_lite_SRCS})
 target_link_libraries(evpp_lite_static ${DEPENDENT_LIBRARIES} ${DEP_LIBS})
