@@ -69,7 +69,10 @@ if (UNIX)
         SET(DEPENDENT_LIBRARIES event glog pthread ssl crypto)
     endif (APPLE)
 else (UNIX)
-    SET(DEPENDENT_LIBRARIES event glog)
+    SET(DEPENDENT_LIBRARIES
+            libevent::core libevent::extra
+            OpenSSL::SSL OpenSSL::Crypto
+            glog::glog)
 endif (UNIX)
 
 # Set to true if https support is needed.
