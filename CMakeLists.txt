@@ -29,6 +29,15 @@ if (UNIX)
             )
     include_directories(${PROJECT_SOURCE_DIR}
             ${PROJECT_SOURCE_DIR}/3rdparty)
+    # added_by xmcy0011@sina.com mac上使用vcpkg的头文件和库
+    if (APPLE)
+        set(VcpkgRoot ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET})
+        include_directories(${VcpkgRoot}/include
+                ${PROJECT_SOURCE_DIR}
+                ${PROJECT_SOURCE_DIR}/3rdparty/wininclude)
+        message("vcpkg root=${VcpkgRoot}")
+        link_directories(${VcpkgRoot}/lib)
+    endif (APPLE)
 
 else (UNIX)
     set(CXX_FLAGS -DWIN32 -D_WIN32 -EHsc)

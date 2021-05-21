@@ -15,6 +15,13 @@ set(MACOSX_RPATH ${LIBRARY_OUTPUT_PATH})
 
 include_directories(${PROJECT_SOURCE_DIR})
 
+# added_s_by xmcy0011@sina.com 2021-05-17 openssl support
+if (APPLE)
+    find_package(Libevent CONFIG REQUIRED)
+    find_package(OpenSSL REQUIRED)
+    find_package(glog CONFIG REQUIRED)
+endif ()
+
 add_library(evpp_static STATIC ${evpp_SRCS})
 target_link_libraries(evpp_static ${DEPENDENT_LIBRARIES})
 
@@ -23,14 +30,6 @@ if (HTTPS)
     target_compile_definitions(evpp_https_static PRIVATE -DEVPP_HTTP_CLIENT_SUPPORTS_SSL)
     target_link_libraries(evpp_https_static ${DEPENDENT_LIBRARIES})
 endif (HTTPS)
-
-
-# added_s_by xmcy0011@sina.com 2021-05-17 openssl support
-if (apple)
-    find_package(Libevent CONFIG REQUIRED)
-    find_package(OpenSSL REQUIRED)
-    find_package(glog CONFIG REQUIRED)
-endif ()
 
 add_library(evpp_lite_static STATIC ${evpp_lite_SRCS})
 target_link_libraries(evpp_lite_static ${DEPENDENT_LIBRARIES} ${DEP_LIBS})
