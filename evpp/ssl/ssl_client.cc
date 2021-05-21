@@ -29,7 +29,7 @@ namespace evpp {
             }
 
             // create SSL_CTX
-            const SSL_METHOD *method = TLS_client_method();
+            const SSL_METHOD *method = SSLv23_method();
             ssl_ctx_ = SSL_CTX_new(method);
             assert(ssl_ctx_);
         }

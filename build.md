@@ -27,6 +27,11 @@ $ -DCMAKE_TOOLCHAIN_FILE=/home/xuyc/data/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 ## Centos 7
 
+0. epel
+```bash
+$ yum install epel-release -y 
+```
+
 1. cmake
 ```bash
 $ yum install cmake # 2.8 需要升级为3
@@ -47,6 +52,10 @@ $ yum install libevent-devel
 
 3. glog
 ```bash
+# gflags
+$ sudo yum install gflags-devel
+
+# glog
 $ git clone https://github.com/google/glog.git
 $ cd glog
 $ cmake -S . -B build -G "Unix Makefiles"

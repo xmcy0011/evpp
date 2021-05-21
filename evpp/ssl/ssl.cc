@@ -301,7 +301,7 @@ namespace evpp {
                 //openSSL库初始化 ///
                 ssl::My_SSL_library_init();
                 //创建SSL_CTX
-                ssl_ctx_ = ::SSL_CTX_new(TLS_server_method());
+                ssl_ctx_ = ::SSL_CTX_new(SSLv23_method());
                 if (!ssl_ctx_) {
                     printf("SSL_CTX_new failed\n");
                     ssl::SSL_library_free();
