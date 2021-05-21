@@ -8,8 +8,7 @@
 #include "evpp/connector.h"
 #include "evpp/tcp_conn.h"
 #include "evpp/tcp_callbacks.h"
-
-#include "evpp/ssl/ssl.h"
+#include "evpp/ssl/ssl_conn.h"
 #include <random>
 
 namespace evpp {
@@ -114,8 +113,8 @@ namespace evpp {
             ShowCerts(ssl);
 
             assert(loop_->IsInLoopThread());
-            TCPConnPtr c = TCPConnPtr(
-                    new TCPConn(loop_, name_, sockfd, laddr, remote_addr_, g_ssl_id_++, ssl_ctx_, ssl));
+            SSLConnPtr c = SSLConnPtr(
+                    new SSLConn(loop_, name_, sockfd, laddr, remote_addr_, g_ssl_id_++, ssl_ctx_, ssl));
             c->set_type(TCPConn::kOutgoing);
             c->SetMessageCallback(msg_fn_);
             c->SetConnectionCallback(conn_fn_);

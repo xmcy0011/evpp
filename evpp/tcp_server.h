@@ -60,7 +60,7 @@ namespace evpp {
                   const std::string &name,
                   uint32_t thread_num);
 
-        ~TCPServer();
+        virtual ~TCPServer();
 
         // @brief Do the initialization works here.
         //  It will create a nonblocking TCP socket, and bind with the give address
@@ -100,19 +100,19 @@ namespace evpp {
             return listen_addr_;
         }
 
-    private:
+    protected:
+        virtual void HandleNewConn(evpp_socket_t sockfd, const std::string &remote_addr/*ip:port*/,
+                                   const struct sockaddr_in *raddr);
+
         void StopThreadPool();
 
         void StopInLoop(DoneCallback on_stopped_cb);
 
         void RemoveConnection(const TCPConnPtr &conn);
 
-        void
-        HandleNewConn(evpp_socket_t sockfd, const std::string &remote_addr/*ip:port*/, const struct sockaddr_in *raddr);
-
         EventLoop *GetNextLoop(const struct sockaddr_in *raddr);
 
-    private:
+    protected:
         EventLoop *loop_;  // the listening loop
         const std::string listen_addr_; // ip:port
         const std::string name_;

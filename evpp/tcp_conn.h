@@ -45,11 +45,9 @@ namespace evpp {
                 evpp_socket_t sockfd,
                 const std::string &laddr,
                 const std::string &raddr,
-                uint64_t id,
-                SSL_CTX *ctx = nullptr,
-                SSL *ssl = nullptr);
+                uint64_t id);
 
-        ~TCPConn();
+        virtual ~TCPConn();
 
         void Close();
 
@@ -172,10 +170,6 @@ namespace evpp {
 
         friend class TCPServer;
 
-        friend class evpp::ssl::SSLServer;
-
-        friend class evpp::ssl::SSLClient;
-
         // These methods are visible only for TCPClient and TCPServer.
         // We don't want the user layer to access these methods.
         void set_type(Type t) {
@@ -198,34 +192,24 @@ namespace evpp {
 
         std::string StatusToString() const;
 
-    private:
-        void HandleRead();
+    protected:
+        virtual void HandleRead();
 
-        void HandleWrite();
+        virtual void HandleWrite();
 
-        void HandleClose();
+        virtual void HandleClose();
 
-        void DelayClose();
+        virtual void DelayClose();
 
-        void HandleError();
+        virtual void HandleError();
 
-        void HandleSSLHandshake();
+        virtual void SendInLoop(const Slice &message);
 
-        void SendInLoop(const Slice &message);
+        virtual void SendInLoop(const void *data, size_t len);
 
-        void SendInLoop(const void *data, size_t len);
+        virtual void SendStringInLoop(const std::string &message);
 
-        void SendStringInLoop(const std::string &message);
-
-    private:
-        // added_by xmcy0011@sina.com support ssl
-        bool enable_server_ssl_;
-        SSL *ssl_;
-        SSL_CTX *ssl_ctx_;
-        std::atomic<bool> sslConnected_;
-        //WsContextPtr wsContext_;
-
-    private:
+    protected:
         EventLoop *loop_;
         int fd_;
         uint64_t id_ = 0;

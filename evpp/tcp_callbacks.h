@@ -7,7 +7,12 @@ namespace evpp {
 
     class TCPConn;
 
+    namespace ssl {
+        class SSLConn;
+    }
+
     typedef std::shared_ptr<TCPConn> TCPConnPtr;
+    typedef std::shared_ptr<ssl::SSLConn> SSLConnPtr;
     typedef std::function<void()> TimerCallback;
 
 // When a connection established, broken down, connecting failed, this callback will be called
