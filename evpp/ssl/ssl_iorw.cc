@@ -2,13 +2,9 @@
 /*    @author create by andy_ro@qq.com                                  */
 /*    @Date		   03.03.2020                                           */
 /************************************************************************/
-#include <unistd.h>
-#include <cstdio>
+
 #include <cerrno>
-#include <sys/uio.h>
-#include <cstdint>
 #include <cstring>  // memset
-#include <string>
 #include <cassert>
 
 #include "evpp/ssl/ssl.h"
