@@ -16,13 +16,9 @@ evpp
 本分支基于 [evpp](https://github.com/Qihoo360/evpp) 8984ca6b
 
 - 增加build.md文档
-- 增加evpp/ssl目录，支持SSL over TCP
-- 新增ssl_server.h/ssl_server.cpp，实现SSL Server
-- 修改tcp_conn，调用evpp/ssl下的SSL_handshake(),SSL_read(),SSL_write()实现ssl握手、数据加密发送和接收解密
-  - HandleRead()增加SSL握手；启用SSL的情况下，使用evpp::ssl::SSL_read()解密读取
-  - HandleClose()增加SSL的释放代码
-  - HandleWrite()增加SSL握手的判断；启用SSL的情况下，使用evpp::ssl::SSL_write()加密发送
-- 增加evpp/ws和evpp/sha1目录，支持WebSocket(ws协议)
+- 修改tcp_conn，SendInLoop(),HandleRead(),HandleWrite(),HandleClose()更改为虚函数以方便实现SslConn,WebSocketConn
+- 增加evpp/ssl目录，支持SSL over TCP，使用方法见evpp/ssl/ssl_server.h的类注释
+- 增加evpp/ws和evpp/sha1目录，支持WebSocket(ws协议)，使用方法见evpp/ws/web_socket_server.h的类注释
 
 感谢 [chnegwuloo的基于muduo扩展的websocket和ssl server](https://github.com/chengwuloo/websocket)
 
