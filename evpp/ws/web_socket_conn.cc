@@ -4,42 +4,48 @@
   * @date 2021/5/22
   */
 
-#include "conn.h"
+#include "web_socket_conn.h"
 #include "evpp/tcp_conn.h"
 
 namespace evpp {
-    namespace websocket {
+    namespace ws {
 
-        Conn::Conn(EventLoop *loop,
-                   const std::string &name,
-                   evpp_socket_t sockfd,
-                   const std::string &laddr,
-                   const std::string &raddr,
-                   uint64_t id)
+        WebSocketConn::WebSocketConn(EventLoop *loop,
+                                     const std::string &name,
+                                     evpp_socket_t sockfd,
+                                     const std::string &laddr,
+                                     const std::string &raddr,
+                                     uint64_t id)
                 : TCPConn(loop, name, sockfd, laddr, raddr, id),
                   is_handshake_(false) {
 
         }
 
-        void Conn::HandleRead() {
+        void WebSocketConn::HandleRead() {
             assert(loop_->IsInLoopThread());
 
             int serrno = 0;
             ssize_t n = input_buffer_.ReadFromFD(chan_->fd(), &serrno);
             if (n > 0) {
                 if (!is_handshake_) {
+                    HandshakeInfo info;
                     WebSocketFrameType type = helper_.parseHandshake(input_buffer_.data(),
-                                                                     input_buffer_.length());
+                                                                     input_buffer_.length(), info);
                     if (type == OPENING_FRAME) {
-                        DLOG_TRACE << "this is a websocket, len=" << input_buffer_.length() << ", answer handshake";
-                        string answer = helper_.answerHandshake();
-
-                        SendInLoop((void *) answer.c_str(), answer.size());
+                        DLOG_TRACE << "websocket do handshake, len=" << input_buffer_.length()
+                                   << ",path=" << info.resource
+                                   << ",Sec-WebSocket-Key=" << info.key
+                                   << ",Sec-WebSocket-Version=" << info.version
+                                   << ",Sec-WebSocket-Protocol=" << info.protocol
+                                   << ",Sec-WebSocket-Extensions=" << info.extensions;
+                        string answer = helper_.answerHandshake(info);
+                        // raw data
+                        TCPConn::SendInLoop((void *) answer.c_str(), answer.size());
                         input_buffer_.Reset();
                         is_handshake_ = true;
                     } else {
                         DLOG_WARN << "unknown frame type = " << type
-                                  << ",websocket need handshake, close the connection.";
+                                  << ",ws need handshake, close the connection.";
                         HandleError();
                     }
                 } else {
@@ -60,13 +66,13 @@ namespace evpp {
 
                         msg_fn_(shared_from_this(), &input_frame_buffer_);
                     } else if (frame_type == WebSocketFrameType::PING_FRAME) {// ping
-                        DLOG_TRACE << "websocket ping";
+                        DLOG_TRACE << "ws ping";
                         input_buffer_.Skip(use_count);
                     } else if (frame_type == WebSocketFrameType::TEXT_FRAME) {
-                        DLOG_WARN << "not support websocket protocol:TEXT_FRAME";
+                        DLOG_WARN << "not support ws protocol:TEXT_FRAME";
                         input_buffer_.Skip(use_count);
                     } else {
-                        DLOG_WARN << "not support websocket protocol:TEXT_FRAME";
+                        DLOG_WARN << "not support ws protocol:TEXT_FRAME";
                         input_buffer_.Skip(use_count);
                     }
                 }
@@ -92,7 +98,7 @@ namespace evpp {
                         DLOG_TRACE << "channel (fd=" << chan_->fd()
                                    << ") DisableReadEvent. And set a timer to delay close this TCPConn, delay time "
                                    << close_delay_.Seconds() << "s";
-                        delay_close_timer_ = loop_->RunAfter(close_delay_, std::bind(&Conn::DelayClose,
+                        delay_close_timer_ = loop_->RunAfter(close_delay_, std::bind(&WebSocketConn::DelayClose,
                                                                                      shared_from_this())); // TODO leave it to user layer close.
                     }
                 }
@@ -107,13 +113,7 @@ namespace evpp {
             }
         }
 
-        void Conn::SendInLoop(const void *data, size_t len) {
-            if (!is_handshake_) {
-                LOG_WARN << "websocket not handshake,disconnect ...";
-                HandleError();
-                return;
-            }
-
+        void WebSocketConn::SendInLoop(const void *data, size_t len) {
             // 4: normal len
             // 6: Extended payload length
             // 4: Masking-key

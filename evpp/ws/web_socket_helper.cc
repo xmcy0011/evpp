@@ -1,4 +1,4 @@
-/** @file websocket.h
+/** @file ws.h
   * @brief 
   * @author teng.qing
   * @date 2021/5/21
@@ -21,13 +21,9 @@
 using namespace std;
 
 namespace evpp {
-    namespace websocket {
+    namespace ws {
 
-        WebSocketHelper::WebSocketHelper() {
-
-        }
-
-        WebSocketFrameType WebSocketHelper::parseHandshake(const char *input_frame, int input_len) {
+        WebSocketFrameType WebSocketHelper::parseHandshake(const char *input_frame, int input_len, HandshakeInfo &info) {
             // 1. copy char*/len into string
             // 2. try to parse headers until \r\n occurs
             string headers(input_frame, input_len);
@@ -45,7 +41,7 @@ namespace evpp {
                 if (header.find("GET") == 0) {
                     vector<string> get_tokens = explode(header, string(" "));
                     if (get_tokens.size() >= 2) {
-                        this->resource = get_tokens[1];
+                        info.resource = get_tokens[1];
                     }
                     key_count++;
                 } else {
@@ -54,10 +50,12 @@ namespace evpp {
                         string header_key(header, 0, pos);
                         string header_value(header, pos + 1);
                         header_value = trim(header_value);
-                        if (header_key == "Host") this->host = header_value;
-                        else if (header_key == "Origin") this->origin = header_value;
-                        else if (header_key == "Sec-WebSocketHelper-Key") this->key = header_value;
-                        else if (header_key == "Sec-WebSocketHelper-Protocol") this->protocol = header_value;
+                        if (header_key == "Host") info.host = header_value;
+                        else if (header_key == "Origin") info.origin = header_value;
+                        else if (header_key == "Sec-WebSocket-Key") info.key = header_value;
+                        else if (header_key == "Sec-WebSocket-Protocol") info.protocol = header_value;
+                        else if (header_key == "Sec-WebSocket-Version") info.version = header_value;
+                        else if (header_key == "Sec-WebSocket-Extensions") info.extensions = header_value;
                         key_count++;
                     }
                 }
@@ -113,16 +111,18 @@ namespace evpp {
             return theStringVector;
         }
 
-        string WebSocketHelper::answerHandshake() {
+        string WebSocketHelper::answerHandshake(const HandshakeInfo &info) {
             unsigned char digest[20]; // 160 bit sha1 digest
 
             string answer;
             answer += "HTTP/1.1 101 Switching Protocols\r\n";
-            answer += "Upgrade: WebSocketHelper\r\n";
+            answer += "Upgrade: WebSocket\r\n";
             answer += "Connection: Upgrade\r\n";
-            if (this->key.length() > 0) {
+
+            assert(!info.key.empty());
+            if (!info.key.empty()) {
                 string accept_key;
-                accept_key += this->key;
+                accept_key += info.key;
                 accept_key += "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"; //RFC6544_MAGIC_KEY
 
                 //printf("INTERMEDIATE_KEY:(%s)\n", accept_key.data());
@@ -150,10 +150,10 @@ namespace evpp {
 
                 accept_key = base64_encode2((const unsigned char *) digest, 20); //160bit = 20 bytes/chars
 
-                answer += "Sec-WebSocketHelper-Accept: " + (accept_key) + "\r\n";
+                answer += "Sec-WebSocket-Accept: " + (accept_key) + "\r\n";
             }
-            if (this->protocol.length() > 0) {
-                answer += "Sec-WebSocketHelper-Protocol: " + (this->protocol) + "\r\n";
+            if (info.protocol.length() > 0) {
+                answer += "Sec-WebSocket-Protocol: " + (info.protocol) + "\r\n";
             }
             answer += "\r\n";
             return answer;
@@ -195,7 +195,7 @@ namespace evpp {
 
         WebSocketFrameType WebSocketHelper::getFrame(const uint8_t *in_buffer, int in_length, uint8_t *out_buffer,
                                                      int out_size, int &out_length, int &use_count) {
-            /* websocket frame: RFC6455
+            /* ws frame: RFC6455
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
              +-+-+-+-+-------+-+-------------+-------------------------------+

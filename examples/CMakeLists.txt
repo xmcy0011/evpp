@@ -49,6 +49,10 @@ target_link_libraries(example_tls_client ${LIBRARIES} ${DEP_LIBS})
 add_executable(example_tls_server tls/tls_server.cpp)
 target_link_libraries(example_tls_server ${LIBRARIES} ${DEP_LIBS})
 
+# ws
+add_executable(example_ws_server ws/websocket_server.cpp)
+target_link_libraries(example_ws_server ${LIBRARIES} ${DEP_LIBS})
+
 add_executable(example_multi_accept multi_accept/main.cc)
 target_link_libraries(example_multi_accept ${LIBRARIES})
 

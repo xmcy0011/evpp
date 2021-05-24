@@ -1,4 +1,4 @@
-/** @file websocket.h
+/** @file ws.h
   * @brief 
   * @author teng.qing
   * @date 2021/5/21
@@ -27,7 +27,7 @@
 using namespace std;
 
 namespace evpp {
-    namespace websocket {
+    namespace ws {
 
         /** @class WebSocketFrameType
           * @brief websocket帧类型
@@ -49,18 +49,29 @@ namespace evpp {
             PONG_FRAME = 0x1A   // pong
         };
 
-        /** @class websocket
+        /** @class HandshakeInfo
+          * @brief 握手信息
+          */
+        struct HandshakeInfo {
+            string resource;      // /sub
+            string host;
+            string origin;
+            string protocol;      // Sec-WebSocket-Protocol
+            string key;           // Sec-WebSocket-Key
+            string version;       // Sec-WebSocket-Version
+            string extensions;    // Sec-WebSocket-Extensions
+        };
+
+        /** @class ws
           * @brief
           */
         class WebSocketHelper {
         public:
-            string resource;
-            string host;
-            string origin;
-            string protocol;
-            string key;
+            WebSocketHelper() = default;
 
-            WebSocketHelper();
+            WebSocketHelper(const WebSocketHelper &) = delete;
+
+            WebSocketHelper &operator=(const WebSocketHelper &) = delete;
 
         public:
             /**
@@ -68,13 +79,22 @@ namespace evpp {
              * @param input_len .in. length of input frame
              * @return [WS_INCOMPLETE_FRAME, WS_ERROR_FRAME, WS_OPENING_FRAME]
              */
-            WebSocketFrameType parseHandshake(const char *input_frame, int input_len);
+
+            /**@fn parseHandshake
+              *@brief 获取握手信息
+              *@param [in]input_frame: 缓冲区
+              *@param [in]input_len: 缓冲区
+              *@param [out]info: 握手信息
+              *@return
+              */
+            WebSocketFrameType parseHandshake(const char *input_frame, int input_len, HandshakeInfo &info);
 
             /** @fn answerHandshake
               * @brief 获取握手响应数据
+              * @param [in]info: 握手信息
               * @return 握手响应帧数据，tcp直接发送即可
               */
-            string answerHandshake();
+            string answerHandshake(const HandshakeInfo &info);
 
             /** @fn makeFrame
               * @brief encode

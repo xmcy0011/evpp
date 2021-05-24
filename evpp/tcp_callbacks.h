@@ -11,13 +11,13 @@ namespace evpp {
         class SSLConn;
     }
 
-    namespace websocket {
-        class Conn;
+    namespace ws {
+        class WebSocketConn;
     }
 
     typedef std::shared_ptr<TCPConn> TCPConnPtr;
     typedef std::shared_ptr<ssl::SSLConn> SSLConnPtr;
-    typedef std::shared_ptr<websocket::Conn> WSConnPtr;
+    typedef std::shared_ptr<ws::WebSocketConn> WSConnPtr;
     typedef std::function<void()> TimerCallback;
 
 // When a connection established, broken down, connecting failed, this callback will be called

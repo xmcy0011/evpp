@@ -11,19 +11,19 @@
 #include "evpp/event_loop.h"
 #include "evpp/fd_channel.h"
 #include "evpp/buffer.h"
-#include "evpp/websocket/web_socket_helper.h"
+#include "evpp/ws/web_socket_helper.h"
 #include <atomic>
 
 namespace evpp {
-    namespace websocket {
+    namespace ws {
         class WebSocketHelper;
 
         /** @class web_socket_conn
           * @brief
           */
-        class EVPP_EXPORT Conn : public TCPConn {
+        class EVPP_EXPORT WebSocketConn : public TCPConn {
         public:
-            Conn(EventLoop *loop,
+            WebSocketConn(EventLoop *loop,
                  const std::string &name,
                  evpp_socket_t sockfd,
                  const std::string &laddr,
@@ -34,9 +34,12 @@ namespace evpp {
 
             void SendInLoop(const void *data, size_t len) override;
 
+        protected:
+            friend class WebSocketServer;
+
         private:
             std::atomic_bool is_handshake_;
-            evpp::websocket::WebSocketHelper helper_;
+            evpp::ws::WebSocketHelper helper_;
             Buffer input_frame_buffer_;
         };
     }
