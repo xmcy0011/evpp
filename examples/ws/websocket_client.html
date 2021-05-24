@@ -2,32 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>WebSocketDemo</title>
+    <script src="client.js"></script>
     <script>
-        var url = "ws://localhost:8080/websocket/text";
-        var ws = new WebSocket(url);
-        ws.onopen = function (event) {
-            console.log("websocket connection open.");
-            console.log(event);
-        };
-
-        ws.onmessage = function (event) {
-            console.log("websocket message received.")
-            console.log(event.data);
-        };
-
-        ws.onclose = function (event) {
-            console.log("websocket connection close.");
-            console.log(event.code);
-        };
-
-        ws.onerror = function (event) {
-            console.log("websocket connection error.");
-            console.log(event);
-        };
+      var client = new MyClient({
+        notify: function(data) {
+		  console.log(data);
+          // alert(JSON.stringify(data));
+        }
+      });
     </script>
+    <style type="text/css">
+        span{ display:block;}
+    </style>
 </head>
 <body>
-
-</body>
+    <h1>websocket</h1>
+    <h2>status:</h2>
+    <span id="status"></span>
+    <h2>send</h2>
+    <input id="txtMsg"/>
+    <input type="button" id="btnSendMsg" value="send" 
+           onclick="client.sendMsg(document.getElementById('txtMsg').value);"/>
+    <h2>message:</h2>
+    <div id="box"></div>
+  </body>
 </html>
