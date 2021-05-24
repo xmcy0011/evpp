@@ -22,7 +22,7 @@ evpp
   - HandleRead()增加SSL握手；启用SSL的情况下，使用evpp::ssl::SSL_read()解密读取
   - HandleClose()增加SSL的释放代码
   - HandleWrite()增加SSL握手的判断；启用SSL的情况下，使用evpp::ssl::SSL_write()加密发送
-
+- 增加evpp/ws和evpp/sha1目录，支持WebSocket(ws协议)
 
 感谢 [chnegwuloo的基于muduo扩展的websocket和ssl server](https://github.com/chengwuloo/websocket)
 
