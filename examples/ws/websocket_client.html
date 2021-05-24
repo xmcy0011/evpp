@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        var url = "ws://localhost:8080/websocket/text";
+        var ws = new WebSocket(url);
+        ws.onopen = function (event) {
+            console.log("websocket connection open.");
+            console.log(event);
+        };
+
+        ws.onmessage = function (event) {
+            console.log("websocket message received.")
+            console.log(event.data);
+        };
+
+        ws.onclose = function (event) {
+            console.log("websocket connection close.");
+            console.log(event.code);
+        };
+
+        ws.onerror = function (event) {
+            console.log("websocket connection error.");
+            console.log(event);
+        };
+    </script>
+</head>
+<body>
+
+</body>
+</html>
