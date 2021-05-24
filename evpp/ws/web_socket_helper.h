@@ -34,13 +34,13 @@ namespace evpp {
           */
         enum WebSocketFrameType {
             ERROR_FRAME = 0xFF00,       // 帧错误
-            INCOMPLETE_FRAME = 0xFE00,  // 不完整的帧，损坏
+            INCOMPLETE_FRAME = 0xFE00,  // 不完整的帧
 
             OPENING_FRAME = 0x3300,     // 握手
             CLOSING_FRAME = 0x3400,
 
-            INCOMPLETE_TEXT_FRAME = 0x01,   // 损坏的文本
-            INCOMPLETE_BINARY_FRAME = 0x02, // 损坏的二进制数据
+            INCOMPLETE_TEXT_FRAME = 0x01,   // 不完整的文本
+            INCOMPLETE_BINARY_FRAME = 0x02, // 不完整的二进制数据
 
             TEXT_FRAME = 0x81,      // 文本数据
             BINARY_FRAME = 0x82,    // 二进制数据
